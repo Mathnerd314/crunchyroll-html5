@@ -5,6 +5,8 @@ import { VolumeSliderComponent } from "./VolumeSliderComponent";
 import { PlayPauseButton } from "./PlayPauseButton";
 import { NextVideoButton } from "./NextVideoButton";
 import { VolumeMuteButton } from "./VolumeMuteButton";
+import { SpeedSliderComponent } from "./SpeedSliderComponent";
+import { SpeedButton } from "./SpeedButton";
 import { TimeDisplay } from "./TimeDisplay";
 import { SizeButton } from "./SizeButton";
 import { FullscreenButton } from "./FullscreenButton";
@@ -22,6 +24,8 @@ export interface IChromeBottomProps {
   onFullscreenButtonEndHover: () => void;
   onVolumeMuteButtonHover: () => void;
   onVolumeMuteButtonEndHover: () => void;
+  onSpeedButtonHover: () => void;
+  onSpeedButtonEndHover: () => void;
 }
 
 export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
@@ -62,6 +66,39 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
     }
   }
 
+  private _speedSliderFocus: boolean = false;
+  private _speedSliderMouse: boolean = false;
+
+  private _onSpeedFocus() {
+    this._speedSliderFocus = true;
+
+    this.base.classList.add('chrome-speed-slider-active');
+  }
+
+  private _onSpeedBlur() {
+    this._speedSliderFocus = false;
+
+    if (!this._speedSliderFocus && !this._speedSliderMouse) {
+      this.base.classList.remove('chrome-speed-slider-active');
+    }
+  }
+
+  private _onSpeedMouseEnter() {
+    if (this._speedSliderMouse) return;
+    this._speedSliderMouse = true;
+
+    this.base.classList.add('chrome-speed-slider-active');
+  }
+  
+  private _onRightMouseLeave() {
+    if (!this._speedSliderMouse) return;
+    this._speedSliderMouse = false;
+
+    if (!this._speedSliderFocus && !this._speedSliderMouse) {
+      this.base.classList.remove('chrome-speed-slider-active');
+    }
+  }
+
   setInternalVisibility(visiblity: boolean): void {
     this._progressBar.setInternalVisibility(visiblity);
   }
@@ -76,6 +113,12 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
     const onLeftMouseLeave = () => this._onLeftMouseLeave();
     const onVolumeMouseEnter = () => this._onVolumeMouseEnter();
     
+    const onSpeedFocus = () => this._onSpeedFocus();
+    const onSpeedBlur = () => this._onSpeedBlur();
+
+    const onRightMouseLeave = () => this._onRightMouseLeave();
+    const onSpeedMouseEnter = () => this._onSpeedMouseEnter();
+
     return (
       <div class="html5-video-chrome-bottom">
         <ChromeProgressBarComponent
@@ -105,7 +148,19 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
             </span>
             <TimeDisplay api={props.api}></TimeDisplay>
           </div>
-          <div class="chrome-controls__right">
+          <div class="chrome-controls__right" onMouseLeave={onRightMouseLeave}>
+            <span onMouseEnter={onSpeedMouseEnter}>
+              <SpeedButton
+                api={props.api}
+                onHover={props.onSpeedButtonHover}
+                onEndHover={props.onSpeedButtonEndHover}>
+              </SpeedButton>
+              <SpeedSliderComponent
+                onFocus={onSpeedFocus}
+                onBlur={onSpeedBlur}
+                api={props.api}>
+              </SpeedSliderComponent>
+            </span>
             <SizeButton
               api={props.api}
               visible={props.sizeButtonVisible}

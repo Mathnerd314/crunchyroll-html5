@@ -2,7 +2,7 @@ import { h, render } from 'preact';
 import { Player, IPlayerConfig } from '../media/player/Player';
 import { getMediaByUrl, Formats, getMedia } from 'crunchyroll-lib/media';
 import { NextVideo } from '../media/nextvideo';
-import { NextVideoEvent, PlaybackState, VolumeChangeEvent } from '../media/player/IPlayerApi';
+import { NextVideoEvent, PlaybackState, VolumeChangeEvent, SpeedChangeEvent } from '../media/player/IPlayerApi';
 import parse = require('url-parse');
 import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { VideoTracker } from './Tracking';
@@ -98,6 +98,14 @@ export class PlayerController {
     await storage.set<IVolumeData>('volume', data);
   }
 
+  private async _onSpeedChange(e: SpeedChangeEvent): Promise<void> {
+    const speed = e.speed;
+
+    const storage = container.get<IStorage>(IStorageSymbol);
+
+    await storage.set<number>('speed', speed);
+  }
+
   private _onFullscreenChange(): void {
     if (!this._player || this._player.getApi().isFullscreen()) return;
 
@@ -145,6 +153,11 @@ export class PlayerController {
     if (volumeData) {
       videoConfig.muted = volumeData.muted;
       videoConfig.volume = volumeData.volume;
+    }
+
+    const speed = await storage.get<number>('speed');
+    if (speed) {
+      videoConfig.speed = speed;
     }
 
     // Register the next video if there's one
@@ -237,6 +250,7 @@ export class PlayerController {
     api.listen('fullscreenchange', () => this._onFullscreenChange());
     api.listen('nextvideo', (e: NextVideoEvent) => this._onNextVideo(e));
     api.listen('volumechange', (e: VolumeChangeEvent) => this._onVolumeChange(e));
+    api.listen('speedchange', (e: SpeedChangeEvent) => this._onSpeedChange(e));
 
     let media: IMedia;
 

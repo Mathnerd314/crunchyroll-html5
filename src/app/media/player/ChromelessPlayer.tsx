@@ -7,7 +7,7 @@ import { SubtitleContainerComponent } from './SubtitleContainerComponent';
 import { LibAssSubtitleEngine } from '../subtitles/LibAssSubtitleEngine';
 import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
 import { IRect } from '../../utils/rect';
-import { IPlayerApi, PlaybackState, PlaybackStateChangeEvent, TimeUpdateEvent, VolumeChangeEvent, DurationChangeEvent, SeekEvent } from './IPlayerApi';
+import { IPlayerApi, PlaybackState, PlaybackStateChangeEvent, TimeUpdateEvent, VolumeChangeEvent, SpeedChangeEvent, DurationChangeEvent, SeekEvent } from './IPlayerApi';
 import { getFullscreenElement, requestFullscreen, exitFullscreen } from '../../utils/fullscreen';
 import { ChromelessPlayerApi } from './ChromelessPlayerApi';
 
@@ -170,6 +170,10 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   private _onVolumeChange() {
     this._api.dispatchEvent(new VolumeChangeEvent(this.getVolume(), this.isMuted()));
+  }
+  
+  private _onSpeedChange() {
+    this._api.dispatchEvent(new SpeedChangeEvent(this.getSpeed()));
   }
   
   private _onProgress() {
@@ -409,6 +413,16 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     return this._videoElement.muted;
   }
 
+  setSpeed(speed: number): void {
+    this._videoElement.playbackRate = speed;
+    this._videoElement.defaultPlaybackRate = speed;
+    this._onSpeedChange();
+  }
+
+  getSpeed(): number {
+    return this._videoElement.playbackRate;
+  }
+
   setFullscreenElement(element: HTMLElement): void {
     this._fullscreenElement = element;
   }
@@ -522,6 +536,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
       .listen(this._videoElement, 'durationchange', this._onDurationChange, false)
       .listen(this._videoElement, 'progress', this._onProgress, false)
       .listen(this._videoElement, 'volumechange', this._onVolumeChange, false)
+      .listen(this._videoElement, 'speedchange', this._onSpeedChange, false)
       .listen(this._subtitleEngine, 'resize', this.resizeSubtitle, false)
       .listen(document, "fullscreenchange", this._onFullscreenChange)
       .listen(document, "webkitfullscreenchange", this._onFullscreenChange)

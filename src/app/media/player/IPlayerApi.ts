@@ -32,6 +32,12 @@ export class VolumeChangeEvent extends Event {
   }
 }
 
+export class SpeedChangeEvent extends Event {
+  constructor(public speed: number) {
+    super('speedchange');
+  }
+}
+
 export class NextVideoEvent extends Event {
   constructor(public detail: IVideoDetail) {
     super('nextvideo');
@@ -78,6 +84,9 @@ export interface IPlayerApi extends EventTarget {
   unmute(): void;
   setMuted(muted: boolean): void;
   isMuted(): boolean;
+
+  setSpeed(speed: number): void;
+  getSpeed(): number;
 
   isFullscreenEnabled(): boolean;
   enterFullscreen(): void;

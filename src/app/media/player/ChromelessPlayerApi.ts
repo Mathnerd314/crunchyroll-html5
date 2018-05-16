@@ -132,6 +132,16 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     return this._player.isMuted();
   }
 
+  setSpeed(speed: number): void {
+    if (!this._player) throw new Error("Not initialized");
+    this._player.setSpeed(speed);
+  }
+
+  getSpeed(): number {
+    if (!this._player) throw new Error("Not initialized");
+    return this._player.getSpeed();
+  }
+
   isFullscreenEnabled(): boolean {
     return isFullscreenEnabled();
   }
